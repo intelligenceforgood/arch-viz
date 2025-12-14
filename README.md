@@ -1,5 +1,9 @@
 # Architecture Visualization
 
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
+[![Graphviz](https://img.shields.io/badge/Tool-Graphviz-orange.svg)](https://graphviz.org/)
+[![Make](https://img.shields.io/badge/Build-Makefile-informational.svg)](Makefile)
+
 This repository contains the "Diagrams as Code" source for the i4g platform architecture.
 
 ## Setup
