@@ -1,6 +1,6 @@
 from diagrams import Cluster, Diagram, Edge
 from diagrams.gcp.compute import Run
-from diagrams.gcp.database import Firestore
+from diagrams.gcp.database import SQL
 from diagrams.gcp.network import LoadBalancing
 from diagrams.gcp.security import Iam, KeyManagementService
 from diagrams.onprem.client import User, Users
@@ -29,7 +29,7 @@ with Diagram(
 
     with Cluster(label="Data Protection"):
         kms = KeyManagementService("Cloud KMS")
-        vault = Firestore("PII Vault")
+        vault = SQL("PII Vault")
 
     # Authentication Flow
     victim >> Edge(label="1. Sign In") >> idp

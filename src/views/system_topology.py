@@ -2,7 +2,7 @@ from diagrams import Cluster, Diagram, Edge
 from diagrams.azure.database import SQLDatabases
 from diagrams.gcp.analytics import PubSub
 from diagrams.gcp.compute import Run
-from diagrams.gcp.database import Firestore
+from diagrams.gcp.database import SQL
 from diagrams.gcp.devtools import Scheduler
 from diagrams.gcp.ml import AIPlatform, VisionAPI
 from diagrams.gcp.network import LoadBalancing
@@ -34,8 +34,8 @@ with Diagram(
             ui = Run("UI Console\n(Next.js)")
 
         with Cluster(label="Data & Storage"):
-            db = Firestore("Firestore\n(Cases)")
-            vault = Firestore("PII Vault\n(Encrypted)")
+            db = SQL("Cloud SQL\n(Cases)")
+            vault = SQL("PII Vault\n(Encrypted)")
             buckets = Storage("GCS Buckets\n(Evidence/Reports)")
 
         with Cluster(label="AI & Processing"):

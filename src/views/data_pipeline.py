@@ -1,7 +1,7 @@
 from diagrams import Cluster, Diagram, Edge
 from diagrams.gcp.analytics import PubSub
 from diagrams.gcp.compute import Run
-from diagrams.gcp.database import Firestore
+from diagrams.gcp.database import SQL
 from diagrams.gcp.ml import AIPlatform, VisionAPI
 from diagrams.gcp.storage import Storage
 
@@ -24,12 +24,12 @@ with Diagram(
             ocr = VisionAPI("Document AI")
 
         with Cluster(label="Security"):
-            pii_vault = Firestore("PII Vault")
+            pii_vault = SQL("PII Vault")
 
         with Cluster(label="Storage"):
             raw_bucket = Storage("Raw Evidence")
             clean_bucket = Storage("Redacted Evidence")
-            case_db = Firestore("Case\nMetadata")
+            case_db = SQL("Case\nMetadata")
 
     with Cluster(label="Indexing"):
         vector_db = AIPlatform("Vertex AI\nVector Search")
