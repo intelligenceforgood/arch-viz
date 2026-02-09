@@ -18,32 +18,28 @@ with Diagram(
         analyst = Users("Analyst")
         admin = Users("Admin")
 
-    with Cluster(label="Identity Provider"):
-        idp = Iam("Identity Platform\n(Firebase Auth)")
-
-    with Cluster(label="Access Control"):
-        lb = LoadBalancing("Global LB\n(IAP / Armor)")
+    with Cluster(label="Identity & Access"):
+        lb = LoadBalancing("Global LB")
+        iap = Iam("Identity-Aware Proxy\n(IAP)")
 
     with Cluster(label="Service Layer"):
-        api = Run("Core API")
+        ui = Run("UI Console\n(Next.js)")
+        api = Run("Core API\n(FastAPI)")
 
     with Cluster(label="Data Protection"):
         kms = KeyManagementService("Cloud KMS")
-        vault = SQL("PII Vault")
+        vault = SQL("PII Vault\n(Isolated Project)")
 
-    # Authentication Flow
-    victim >> Edge(label="1. Sign In") >> idp
-    analyst >> Edge(label="1. Sign In") >> idp
+    # Authentication Flow — IAP handles Google Sign-In
+    victim >> Edge(label="1. HTTPS Request") >> lb
+    analyst >> Edge(label="1. HTTPS Request") >> lb
 
-    # Token Exchange
-    idp >> Edge(label="2. JWT Token", style="dashed") >> victim
-    idp >> Edge(label="2. JWT Token", style="dashed") >> analyst
+    # IAP enforces authentication before traffic reaches Cloud Run
+    lb >> Edge(label="2. Google Sign-In") >> iap
+    iap >> Edge(label="3. X-Goog-Authenticated-User-Email") >> ui
 
     # Authorized Request
-    victim >> Edge(label="3. Request + Bearer Token") >> lb
-    analyst >> Edge(label="3. Request + Bearer Token") >> lb
-
-    lb >> Edge(label="4. Verify Token") >> api
+    ui >> Edge(label="4. API Call + X-API-KEY") >> api
 
     # Data Access
     api >> Edge(label="5. Decrypt PII") >> kms

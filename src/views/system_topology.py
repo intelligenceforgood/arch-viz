@@ -19,14 +19,14 @@ with Diagram(
 ):
 
     with Cluster(label="External Users"):
-        victim = User("Victim\n(Chatbot)")
-        analyst = Users("Analysts\n(Dashboard)")
+        victim = User("Victim\n(Intake Form)")
+        analyst = Users("Analysts\n(Console)")
 
     with Cluster(label="GCP Project (i4g-prod)"):
 
         with Cluster(label="Ingress & Auth"):
             lb = LoadBalancing("Global LB")
-            auth = Iam("Identity Platform")
+            auth = Iam("IAP\n(Google Sign-In)")
 
         with Cluster(label="Compute (Cloud Run)"):
             api = Run("Core API\n(FastAPI)")
