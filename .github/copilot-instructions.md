@@ -2,8 +2,8 @@
 
 **Unified Workspace Context:** This repository is part of the `i4g` multi-root workspace. The `core/` repository acts as the primary entry point for coding conventions and architectural standards. These instructions are synchronized to ensure consistent behavior across all roots.
 
-1. **Rehydrate & Daily Loop** – Start every session by checking `git status -sb`. Skim `planning/change_log.md` for recent decisions.
-   - **Plan:** Note active task in `planning/copilot_prompt/COPILOT_SESSION.md`.
+1. **Rehydrate & Daily Loop** – Start every session by checking `git status -sb`. Skim `planning/change_log.md` for recent decisions. Check `.entire/` and `.claud/` folders (if present) for conversation context from prior commits — these are managed by the Entire tool and capture AI session history per commit.
+   - **Plan:** Check active work stream in `planning/tasks/debt_remediation_plan.md`.
    - **Build:** Run `uvicorn i4g.api.app:app --reload` for API; use `conda run -n i4g ...`.
    - **Test:** Run `pytest tests/unit` or targeted smokes. If skipping, record why.
    - **Docs:** Update `docs/` and `planning/change_log.md` when behavior/env vars change.
@@ -11,7 +11,7 @@
 
 2. **Config Discipline** – Always fetch settings via `i4g.settings.get_settings()`; nested sections (`api`, `storage`, `vector`, `llm`, `identity`, etc.) are mutated by `_apply_environment_overrides`, so override via env vars (`I4G_*`, double underscores) rather than hard-coded paths. Store builders live in `src/i4g/services/factories.py`; use them for structured/review/vector/intake/evidence stores.
 
-3. **Coding Conventions** – New Python code needs full type hints, Google-style docstrings, and ≤120 char lines (Black/isort). Stay ASCII unless the file already depends on Unicode. Never revert user-authored changes without direction. Additional cross-language rules live in `core/.github/general-coding.instructions.md`.
+3. **Coding Conventions** – Follow `core/.github/general-coding.instructions.md` for all language-specific standards. Key highlights for this repo: Python uses full type hints, Google-style docstrings, Black/isort at 120-char lines. Shell scripts use `set -euo pipefail` and quote all variables.
 
 4. **Core Architecture** – `src/i4g/api/app.py` wires FastAPI routers, middleware (rate limit + TASK_STATUS), and the report-generation lock. `src/i4g/api/review.py` orchestrates search + queue actions backed by `ReviewStore`, `HybridRetriever`, and audit logging via `store.log_action`. Background work executes through `src/i4g/worker/jobs/*` and `src/i4g/worker/tasks.py` (e.g., `generate_report_for_case`).
 
@@ -44,3 +44,5 @@
 14. **Env + Smoke Discipline** – Treat environment variables as a contract. When adding or changing settings/job envs: (a) add or update coverage under `tests/unit/settings/` so overrides and defaults are validated locally, (b) refresh the env-var reference in `docs/config/` (table plus YAML manifest) so docs stay in sync, and (c) execute the local sandbox smoke (`conda run -n i4g I4G_PROJECT_ROOT=$PWD I4G_ENV=dev I4G_LLM__PROVIDER=mock i4g jobs account ...`) before any Cloud Run job. No cloud smoke runs should happen until the local run succeeds with the same env overrides.
 
 15. **UI Build Procedure** – To build the UI image, always change directory to the UI root first (`cd ui/`) and run the build script from there: `scripts/build_image.sh i4g-console dev`. Do not attempt to build from the workspace root.
+
+16. **Entire Tool Integration** – The Entire tool tracks AI conversation context per commit in `.entire/` and `.claud/` folders. These folders are present in each repo root. `settings.json` is committed (shared config); `logs/`, `metadata/`, and `tmp/` are gitignored (local). Do NOT modify, delete, or overwrite files in `.entire/` or `.claud/` — they are managed exclusively by the Entire tool. During rehydration, read any available context from these folders to understand recent session history.
