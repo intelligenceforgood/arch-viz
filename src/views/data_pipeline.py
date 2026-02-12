@@ -1,7 +1,7 @@
 from diagrams import Cluster, Diagram, Edge
-from diagrams.gcp.analytics import PubSub
 from diagrams.gcp.compute import Run
 from diagrams.gcp.database import SQL
+from diagrams.gcp.devtools import Scheduler
 from diagrams.gcp.ml import AIPlatform, VisionAPI
 from diagrams.gcp.storage import Storage
 
@@ -15,10 +15,10 @@ with Diagram(
 
     with Cluster(label="Ingestion"):
         upload = Run("API Upload")
-        queue = PubSub("Processing Queue")
+        scheduler = Scheduler("Cloud Scheduler")
 
     with Cluster(label="Worker Processing"):
-        worker = Run("Worker Service")
+        worker = Run("Cloud Run Job")
 
         with Cluster(label="Extraction"):
             ocr = VisionAPI("Document AI")
@@ -35,8 +35,8 @@ with Diagram(
         vector_db = AIPlatform("Vertex AI\nVector Search")
 
     # Flow
-    upload >> Edge(label="1. Enqueue") >> queue
-    queue >> Edge(label="2. Pull") >> worker
+    upload >> Edge(label="1. Enqueue") >> case_db
+    scheduler >> Edge(label="2. Trigger") >> worker
 
     worker >> Edge(label="3. Store Raw") >> raw_bucket
     worker >> Edge(label="4. Extract Text") >> ocr

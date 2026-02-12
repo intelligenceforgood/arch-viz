@@ -1,6 +1,4 @@
 from diagrams import Cluster, Diagram, Edge
-from diagrams.azure.database import SQLDatabases
-from diagrams.gcp.analytics import PubSub
 from diagrams.gcp.compute import Run
 from diagrams.gcp.database import SQL
 from diagrams.gcp.devtools import Scheduler
@@ -30,8 +28,11 @@ with Diagram(
 
         with Cluster(label="Compute (Cloud Run)"):
             api = Run("Core API\n(FastAPI)")
-            worker = Run("Worker\n(Jobs)")
             ui = Run("UI Console\n(Next.js)")
+
+        with Cluster(label="Cloud Run Jobs"):
+            worker = Run("Worker Jobs\n(Ingest/Report/Account)")
+            scheduler = Scheduler("Cloud Scheduler")
 
         with Cluster(label="Data & Storage"):
             db = SQL("Cloud SQL\n(Cases)")
@@ -42,13 +43,6 @@ with Diagram(
             ocr = VisionAPI("Document AI\n(OCR)")
             vector = AIPlatform("Vertex AI\n(Vector Search)")
 
-        with Cluster(label="Async / Event Bus"):
-            pubsub = PubSub("Task Queue")
-            scheduler = Scheduler("Weekly Refresh")
-
-    with Cluster(label="Legacy / External"):
-        azure_db = SQLDatabases("Azure SQL\n(Historical)")
-
     # User Access
     victim >> lb >> ui
     analyst >> lb >> ui
@@ -58,16 +52,13 @@ with Diagram(
     # API Interactions
     api >> db
     api >> vault
-    api >> pubsub
     api >> vector
 
+    # Scheduled Jobs trigger Cloud Run Jobs
+    scheduler >> worker
+
     # Worker Processing
-    pubsub >> worker
     worker >> ocr
     worker >> buckets
     worker >> db
     worker >> vault
-
-    # Scheduled Jobs
-    scheduler >> worker
-    worker >> Edge(label="Sync") >> azure_db
